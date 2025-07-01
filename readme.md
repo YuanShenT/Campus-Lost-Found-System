@@ -44,7 +44,7 @@
    git clone https://github.com/YuanShenT/Campus-Lost-Found-System.git
    cd Campus-Lost-Found-System
    ```
-   若没有，也可选择通过浏览器到https://github.com/YuanShenT/Campus-Lost-Found-System下载项目压缩包。
+   若没有，也可选择通过浏览器到 https://github.com/YuanShenT/Campus-Lost-Found-System 下载项目压缩包。
    
 2. **创建并激活虚拟环境**:
 
