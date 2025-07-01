@@ -19,7 +19,7 @@
 
 ## 🌟 技术亮点 (Technical Highlights)
 
-- **智能匹配算法**: 后端采用 **`Jieba` **分词库对物品名称和描述进行中文分词处理，结合地点、时间窗口等多维信息，构建高效的模糊匹配查询。
+- **智能匹配算法**: 后端采用 `Jieba` 分词库对物品名称和描述进行中文分词处理，结合地点、时间窗口等多维信息，构建高效的模糊匹配查询。
 - **动态地图坐标转换**: 前端通过 JavaScript 实时计算用户点击位置在不同分辨率下的相对坐标，确保地图标记在任何设备上都能精准显示和存储 。
 - **异步邮件通知**: 邮件发送任务通过独立的线程执行 (`send_async_email`)，避免了因网络延迟阻塞主应用进程，保证了流畅的用户体验。
 - **RESTful 风格接口**: 提供了一套清晰、规范的后端路由，便于未来进行功能扩展。
@@ -38,11 +38,13 @@
 #### 2. 安装步骤
 
 1. **克隆代码**:
-
+   
+   若电脑安装有Git软件则命令行运行下面命令：
    ```bash
-   git clone https://github.com/your-username/your-repo-name.git
-   cd your-repo-name
+   git clone https://github.com/YuanShenT/Campus-Lost-Found-System.git
+   cd Campus-Lost-Found-System
    ```
+   若没有，也可选择通过浏览器到https://github.com/YuanShenT/Campus-Lost-Found-System下载项目压缩包。
    
 2. **创建并激活虚拟环境**:
 
@@ -63,7 +65,6 @@
 
 3. **安装依赖**:
 
-   Bash
 
    ```bash
    pip install -r requirements.txt
@@ -158,7 +159,7 @@
      ```
 
 
-   4. **邮件服务器配置：**
+   5. **邮件服务器配置：**
       务必将以下占位符替换为你实际的邮件服务提供商信息。 例如，如果你使用 Gmail，可能需要开启“两步验证”并生成“应用专用密码”。如果你使用 QQ 邮箱，则需要使用“授权码”。
 
       ```python
