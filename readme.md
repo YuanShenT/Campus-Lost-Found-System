@@ -69,7 +69,7 @@
    ```bash
    pip install -r requirements.txt
    ```
-
+   
 4. **配置数据库**:
 
    本项目使用 MySQL 数据库。请按照以下步骤进行设置：
@@ -169,7 +169,7 @@
       MAIL_DEFAULT_SENDER = 'your_email@example.com' # 默认发件人
       ```
 
-   #### 3.**运行程序**:
+#### 3. 运行程序
 
    在项目根目录下，确保虚拟环境已激活，然后执行：
 
