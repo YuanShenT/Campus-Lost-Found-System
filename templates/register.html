@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 - 校园失物招领</title>
+    <style>
+        /* 样式与之前提供的相同，确保美观 */
+        body { font-family: sans-serif; margin: 2em; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; min-height: 90vh; }
+        .container { max-width: 400px; width: 100%; margin: 0 auto; padding: 30px; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); background-color: #fff; }
+        h2 { text-align: center; color: #333; margin-bottom: 25px; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: bold; }
+        input[type="text"], input[type="password"], input[type="email"] { width: calc(100% - 22px); /* 减去padding和border */ padding: 12px 10px; margin-bottom: 18px; border: 1px solid #ccd; border-radius: 5px; box-sizing: border-box; font-size: 1em; }
+        input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus { border-color: #007bff; outline: none; box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); }
+        input[type="submit"] { background-color: #007bff; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 1.1em; transition: background-color 0.2s ease; }
+        input[type="submit"]:hover { background-color: #0056b3; }
+        .flash { padding: 12px; margin-bottom: 15px; border-radius: 5px; border: 1px solid transparent; font-size: 0.95em; }
+        .flash.success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .flash.danger { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .flash.info { background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+        .links { text-align: center; margin-top: 25px; font-size: 0.95em; }
+        .links a { color: #007bff; text-decoration: none; }
+        .links a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>用户注册</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="flash {{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        <form method="POST" action="{{ url_for('register') }}">
+            <label for="username">用户名:</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="email">邮箱:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="password">密码:</label>
+            <input type="password" id="password" name="password" required>
+
+            <label for="confirm_password">确认密码:</label>
+            <input type="password" id="confirm_password" name="confirm_password" required>
+
+            <input type="submit" value="注册">
+        </form>
+        <div class="links">
+            <p>已有账号？<a href="{{ url_for('login') }}">立即登录</a></p>
+            <p><a href="{{ url_for('index') }}">返回首页</a></p>
+        </div>
+    </div>
+</body>
+</html>

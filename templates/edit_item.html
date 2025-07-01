@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编辑信息 - {{ item.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* 保持与 publish_item.html 类似的样式，或者直接在这里包含那些样式 */
+        body { font-family: sans-serif; margin: 2em; background-color: #f4f7f6; display: flex; justify-content: center; align-items: flex-start; min-height: 90vh; }
+        .container { max-width: 600px; width: 100%; margin: 30px auto; padding: 30px; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); background-color: #fff; }
+        h2 { text-align: center; color: #333; margin-bottom: 25px; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: bold; }
+        input[type="text"], input[type="file"], input[type="datetime-local"], textarea, select {
+            width: calc(100% - 22px);
+            padding: 12px 10px;
+            margin-bottom: 18px;
+            border: 1px solid #ccd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        textarea { resize: vertical; min-height: 80px; }
+        input[type="submit"] { background-color: #007bff; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 1.1em; transition: background-color 0.2s ease; }
+        input[type="submit"]:hover { background-color: #0056b3; }
+        .flash { padding: 12px; margin-bottom: 15px; border-radius: 5px; border: 1px solid transparent; font-size: 0.95em; }
+        .flash.success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .flash.danger { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .flash.info { background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+        .links { text-align: center; margin-top: 25px; font-size: 0.95em; }
+        .links a { color: #007bff; text-decoration: none; }
+        .links a:hover { text-decoration: underline; }
+
+        /* 编辑页面特有的图片预览 */
+        .current-image {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .current-image img {
+            max-width: 200px;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        /* --- 新增：地图和图钉的 CSS 样式 (从 publish_item.html 复制) --- */
+        #map-section {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        #map-section h3 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        #map-container {
+            position: relative;
+            display: block;
+            width: 100%;
+            /* max-width: 560px; /* 如果容器是 600px 宽，图片可以稍微窄一点 */
+            margin: 10px auto 20px auto;
+            border: 1px solid #ccd;
+            border-radius: 5px;
+            overflow: hidden;
+            cursor: crosshair; /* 编辑时允许点击 */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #campus-map {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        #map-pin {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-image: url("{{ url_for('static', filename='images/pin.png') }}");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transform: translate(-50%, -90%);
+            display: none; /* 初始隐藏，由 JS 控制显示 */
+            pointer-events: none;
+            filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.3));
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>编辑信息 - {{ item.name }}</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="flash {{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        <form method="POST" action="{{ url_for('edit_item', item_id=item.id) }}" enctype="multipart/form-data">
+            {# 物品类型不能修改，只显示 #}
+            <label>信息类型:</label>
+            <p>{{ '失物' if item.type == 'lost' else '拾物' }}</p>
+
+            <label for="name">物品名称:</label>
+            <input type="text" id="name" name="name" required value="{{ item.name }}">
+
+            <label for="description">详细描述 (可选):</label>
+            <textarea id="description" name="description" placeholder="物品特征、特殊标记等">{{ item.description }}</textarea>
+
+            <label for="location">丢失/拾取地点:</label>
+            <input type="text" id="location" name="location" required value="{{ item.location }}">
+
+            <label for="event_time">发生时间:</label>
+            {# event_time 是 datetime 对象，需要格式化为 'YYYY-MM-DDTHH:MM' 才能正确填充 datetime-local input #}
+            <input type="datetime-local" id="event_time" name="event_time" required value="{{ formatted_event_time }}">
+
+            <label for="image">当前图片:</label>
+            <div class="current-image">
+                <img src="{{ url_for('static', filename='uploads/' + item.image_file) }}" alt="当前图片">
+                {% if item.image_file and item.image_file != 'default.jpg' %}
+                    <p>文件名: {{ item.image_file }}</p>
+                {% else %}
+                    <p>无图片</p>
+                {% endif %}
+            </div>
+
+            <label for="image">上传新图片 (会替换旧图片):</label>
+            <input type="file" id="image" name="image" accept="image/*">
+
+            {# --- 新增：地图选择部分 (从 publish_item.html 复制并修改) --- #}
+            <div id="map-section">
+                <h3>在地图上标注大致位置 (可选)</h3>
+                <p style="text-align: center; margin-bottom: 15px; color: #666; font-size: 0.9em;">
+                    点击地图上的任意位置放置图钉，再次点击可移动图钉。
+                </p>
+                <div id="map-container">
+                    <img id="campus-map" src="{{ url_for('static', filename='map/map.png') }}" alt="校园地图">
+                    <div id="map-pin"></div>
+                </div>
+
+                <input type="hidden" id="pin_x_input" name="pin_x" value="{{ item.pin_x if item.pin_x is not none else '' }}">
+                <input type="hidden" id="pin_y_input" name="pin_y" value="{{ item.pin_y if item.pin_y is not none else '' }}">
+            </div>
+            {# --- 地图选择部分结束 --- #}
+
+            <input type="submit" value="更新信息">
+        </form>
+        <div class="links">
+            <p><a href="{{ url_for('item_detail', item_id=item.id) }}">返回物品详情</a></p>
+            <p><a href="{{ url_for('dashboard') }}">返回个人中心</a></p>
+        </div>
+    </div>
+
+    <script>
+        const mapContainer = document.getElementById('map-container');
+        const campusMap = document.getElementById('campus-map');
+        const mapPin = document.getElementById('map-pin');
+        const pinXInput = document.getElementById('pin_x_input');
+        const pinYInput = document.getElementById('pin_y_input');
+
+        // 定义原始图片尺寸（从 Flask 传递过来）
+        const ORIGINAL_IMAGE_WIDTH = {{ ORIGINAL_MAP_WIDTH | tojson }};
+        const ORIGINAL_IMAGE_HEIGHT = {{ ORIGINAL_MAP_HEIGHT | tojson }};
+
+        // 确保图片完全加载后再添加事件监听器和设置初始图钉
+        campusMap.onload = function() {
+            // 设置初始图钉位置（如果 item 已经有 pin_x 和 pin_y）
+            const initialPinX = parseFloat(pinXInput.value);
+            const initialPinY = parseFloat(pinYInput.value);
+
+            if (!isNaN(initialPinX) && !isNaN(initialPinY)) {
+                // 将原始坐标转换到当前显示图片上的坐标
+                const displayedWidth = campusMap.offsetWidth;
+                const displayedHeight = campusMap.offsetHeight;
+
+                const scaleX = displayedWidth / ORIGINAL_IMAGE_WIDTH;
+                const scaleY = displayedHeight / ORIGINAL_IMAGE_HEIGHT;
+
+                const pinX_displayed = initialPinX * scaleX;
+                const pinY_displayed = initialPinY * scaleY;
+
+                setPinPosition(pinX_displayed, pinY_displayed);
+            }
+
+            // 添加点击事件监听器，允许用户修改图钉位置
+            mapContainer.addEventListener('click', function(event) {
+                const rect = campusMap.getBoundingClientRect(); // 获取图片当前在屏幕上的实际尺寸和位置
+                const clickedX_displayed = event.clientX - rect.left;
+                const clickedY_displayed = event.clientY - rect.top;
+
+                // 检查点击是否在图片范围内
+                if (clickedX_displayed >= 0 && clickedX_displayed <= campusMap.offsetWidth &&
+                    clickedY_displayed >= 0 && clickedY_displayed <= campusMap.offsetHeight) {
+
+                    // 1. 获取当前显示图片的实际宽度和高度
+                    const displayedWidth = campusMap.offsetWidth;
+                    const displayedHeight = campusMap.offsetHeight;
+
+                    // 2. 计算缩放比例
+                    const scaleX = ORIGINAL_IMAGE_WIDTH / displayedWidth;
+                    const scaleY = ORIGINAL_IMAGE_HEIGHT / displayedHeight;
+
+                    // 3. 将点击坐标转换回原始图片尺寸上的坐标
+                    const originalX = Math.round(clickedX_displayed * scaleX);
+                    const originalY = Math.round(clickedY_displayed * scaleY);
+
+                    // 设置图钉位置 (显示在缩放后的图片上)
+                    setPinPosition(clickedX_displayed, clickedY_displayed);
+
+                    // 更新隐藏字段的值，传递原始图片坐标给后端
+                    pinXInput.value = originalX;
+                    pinYInput.value = originalY;
+                }
+            });
+        };
+
+        // 如果图片是从缓存加载，onload 事件可能不会触发。
+        // 所以这里也添加一个检查，确保即使没有 onload 也能绑定事件并设置初始图钉。
+        if (campusMap.complete && campusMap.naturalWidth) { // naturalWidth 确保图片已加载
+            campusMap.onload(); // 手动触发一次 onload 逻辑
+        }
+
+
+        function setPinPosition(x, y) {
+            mapPin.style.left = `${x}px`;
+            mapPin.style.top = `${y}px`;
+            mapPin.style.display = 'block'; // 显示图钉
+        }
+    </script>
+</body>
+</html>

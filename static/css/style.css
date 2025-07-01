@@ -1,0 +1,637 @@
+/* static/css/style.css */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f2f5;
+    color: #333;
+}
+
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.main-header {
+    background-color: #4CAF50; /* 绿色 */
+    color: white;
+    padding: 15px 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.main-header h1 {
+    margin: 0;
+    display: inline-block;
+}
+
+.main-header h1 a {
+    color: white;
+    text-decoration: none;
+}
+
+.main-nav {
+    float: right;
+}
+
+.main-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.main-nav li {
+    display: inline-block;
+    margin-left: 20px;
+}
+
+.main-nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.main-nav a:hover {
+    color: #e0e0e0;
+}
+
+.hero {
+    text-align: center;
+    padding: 60px 20px;
+    background-color: #ffffff;
+    margin-top: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.hero h2 {
+    color: #4CAF50;
+    margin-bottom: 20px;
+    font-size: 2.5em;
+}
+
+.hero p {
+    font-size: 1.1em;
+    line-height: 1.8;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.hero a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.hero a:hover {
+    text-decoration: underline;
+}
+
+.flashes {
+    list-style: none;
+    padding: 0;
+    margin: 20px auto 0;
+    max-width: 960px;
+    border-radius: 8px;
+    overflow: hidden; /* Ensures border-radius applies to children */
+}
+
+.flash {
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    border-left: 5px solid;
+    font-weight: bold;
+    opacity: 0.95;
+}
+
+.flash.success {
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #28a745;
+}
+
+.flash.danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #dc3545;
+}
+
+.flash.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-color: #17a2b8;
+}
+
+.latest-items {
+    margin-top: 40px;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.latest-items h3 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 1.8em;
+}
+
+.item-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #f9f9f9;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.item-card h4 {
+    color: #4CAF50;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.item-card p {
+    margin-bottom: 5px;
+    font-size: 0.95em;
+    color: #666;
+}
+
+.main-footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 50px;
+}
+
+
+.item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* 响应式网格布局 */
+    gap: 25px; /* 卡片之间的间距 */
+    margin-top: 20px;
+}
+
+.item-card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    overflow: hidden; /* 确保图片圆角 */
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.item-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+.item-card.lost {
+    border-top: 5px solid #dc3545; /* 红色边框表示失物 */
+}
+
+.item-card.found {
+    border-top: 5px solid #28a745; /* 绿色边框表示拾物 */
+}
+
+.item-image {
+    width: 100%;
+    height: 200px; /* 固定图片高度 */
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #e9ecef; /* 默认背景色 */
+}
+
+.item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 裁剪图片以填充容器 */
+    display: block;
+}
+
+.item-content {
+    padding: 15px;
+    flex-grow: 1; /* 内容区域占据剩余空间 */
+    display: flex;
+    flex-direction: column;
+}
+
+.item-content h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.3em;
+    color: #333;
+}
+
+.item-type-tag {
+    font-size: 0.9em;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.item-content p {
+    margin-bottom: 8px;
+    font-size: 0.95em;
+    color: #555;
+    line-height: 1.5;
+}
+
+.item-posted-by {
+    font-size: 0.85em;
+    color: #777;
+    margin-top: auto; /* 将发布者信息推到底部 */
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.btn-detail {
+    display: inline-block;
+    background-color: #007bff;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    text-align: center;
+    margin-top: 15px;
+    transition: background-color 0.2s ease;
+}
+
+.btn-detail:hover {
+    background-color: #0056b3;
+}
+
+.no-items-message {
+    text-align: center;
+    padding: 30px;
+    font-size: 1.2em;
+    color: #777;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .main-nav {
+        float: none;
+        text-align: center;
+        margin-top: 15px;
+    }
+    .main-nav li {
+        display: block;
+        margin: 10px 0;
+    }
+    .item-grid {
+        grid-template-columns: 1fr; /* 小屏幕下每行一个卡片 */
+    }
+    .container {
+        padding: 0 15px;
+    }
+}
+
+
+.search-section {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    padding: 25px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.search-form {
+    display: flex;
+    flex-wrap: wrap; /* 允许项目换行 */
+    justify-content: center;
+    align-items: center;
+    gap: 15px; /* 表单元素之间的间距 */
+}
+
+.search-form input[type="text"],
+.search-form select {
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    flex-grow: 1; /* 允许输入框和选择框增长 */
+    max-width: 300px; /* 限制最大宽度 */
+}
+
+.search-form button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s ease;
+}
+
+.search-form button:hover {
+    background-color: #0056b3;
+}
+
+.clear-search-btn {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #6c757d; /* 灰色 */
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 1em;
+    transition: background-color 0.2s ease;
+}
+
+.clear-search-btn:hover {
+    background-color: #5a6268;
+}
+
+/* 响应式调整 */
+@media (max-width: 600px) {
+    .search-form {
+        flex-direction: column; /* 小屏幕下垂直堆叠 */
+        align-items: stretch; /* 拉伸以填充宽度 */
+    }
+    .search-form input[type="text"],
+    .search-form select,
+    .search-form button,
+    .clear-search-btn {
+        width: 100%; /* 小屏幕下宽度100% */
+        max-width: none; /* 移除最大宽度限制 */
+    }
+}
+
+
+/* 个人中心相关的样式 */
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.dashboard-header h2 {
+    color: #4CAF50;
+    font-size: 2.2em;
+    margin-bottom: 10px;
+}
+
+.dashboard-header p {
+    font-size: 1.1em;
+    color: #666;
+}
+
+.dashboard-item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.dashboard-item-card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    position: relative;
+}
+
+/* 可以复用 .item-card 的hover效果，如果需要的话 */
+.dashboard-item-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+.dashboard-item-card.lost { border-top: 5px solid #dc3545; }
+.dashboard-item-card.found { border-top: 5px solid #28a745; }
+
+.dashboard-item-image {
+    width: 100%;
+    height: 180px; /* 调整图片高度 */
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #e9ecef;
+}
+
+.dashboard-item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.dashboard-item-content {
+    padding: 15px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-item-content h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    color: #333;
+}
+
+.dashboard-item-content p {
+    margin-bottom: 8px;
+    font-size: 0.9em;
+    color: #555;
+    line-height: 1.5;
+}
+
+.dashboard-item-actions {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 15px;
+    border-top: 1px solid #eee;
+    background-color: #f8f8f8;
+}
+
+.dashboard-item-actions a, .dashboard-item-actions button {
+    flex-grow: 1;
+    text-align: center;
+    padding: 8px 10px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 0.9em;
+    margin: 0 5px;
+    white-space: nowrap;
+    transition: background-color 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.dashboard-item-actions .edit-btn { background-color: #ffc107; color: #333; }
+.dashboard-item-actions .edit-btn:hover { background-color: #e0a800; }
+.dashboard-item-actions .delete-btn { background-color: #dc3545; color: white; }
+.dashboard-item-actions .delete-btn:hover { background-color: #c82333; }
+.dashboard-item-actions .mark-found-btn { background-color: #28a745; color: white; }
+.dashboard-item-actions .mark-found-btn:hover { background-color: #218838; }
+
+.item-status-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #ffc107; /* 默认黄色 */
+    color: #333;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.8em;
+    font-weight: bold;
+    z-index: 10;
+}
+.item-status-badge.active { background-color: #17a2b8; color: white; } /* 蓝色 */
+.item-status-badge.found, .item-status-badge.returned { background-color: #28a745; color: white; } /* 绿色 */
+
+/* 当没有物品时的消息 */
+.no-items-message {
+    text-align: center;
+    padding: 30px;
+    font-size: 1.2em;
+    color: #777;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.no-items-message a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+.no-items-message a:hover {
+    text-decoration: underline;
+}
+
+/* static/css/style.css */
+/* ... (在文件末尾添加) ... */
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+    display: inline-block; /* 确保它是一个块级元素，可以设置内边距和外边距 */
+    margin: 0 10px; /* 与其他按钮的间距 */
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-reply { /* 回复按钮样式 */
+    background-color: #6c757d;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.85em;
+    display: inline-block;
+    margin-top: 10px;
+}
+.btn-reply:hover {
+    background-color: #5a6268;
+}
+
+/* 确保 detail-footer 的元素能正确对齐 */
+.detail-footer {
+    display: flex;
+    justify-content: center; /* 居中对齐按钮 */
+    align-items: center;
+    gap: 20px; /* 按钮之间的间距 */
+    flex-wrap: wrap; /* 允许在小屏幕上换行 */
+}
+.detail-footer p {
+    margin: 0; /* 移除段落默认外边距 */
+}
+
+.dashboard-actions {
+    text-align: center;
+    margin-top: 10px; /* 调整上外边距，让它不那么贴近 header */
+    margin-bottom: 30px;
+    background-color: #fff; /* 给这一区域一个背景色 */
+    padding: 15px 20px; /* 增加内边距 */
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* 添加轻微阴影 */
+}
+
+.dashboard-actions .btn {
+    display: inline-block;
+    padding: 12px 25px; /* 增加内边距让按钮更大气 */
+    background-color: #4CAF50; /* 保持与主色调一致 */
+    color: white;
+    text-decoration: none;
+    border-radius: 25px; /* 椭圆形按钮 */
+    font-weight: bold;
+    font-size: 1.1em; /* 字号略大 */
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* 添加按钮阴影 */
+}
+
+.dashboard-actions .btn:hover {
+    background-color: #45a049; /* 悬停颜色 */
+    transform: translateY(-2px); /* 悬停时轻微上浮 */
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15); /* 悬停时阴影加深 */
+}
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+    display: inline-block; /* 确保它是一个块级元素，可以设置内边距和外边距 */
+    margin: 0 10px; /* 与其他按钮的间距 */
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-reply { /* 回复按钮样式 */
+    background-color: #6c757d;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.85em;
+    display: inline-block;
+    margin-top: 10px;
+}
+.btn-reply:hover {
+    background-color: #5a6268;
+}
+
+/* 确保 detail-footer 的元素能正确对齐 */
+.detail-footer {
+    display: flex;
+    justify-content: center; /* 居中对齐按钮 */
+    align-items: center;
+    gap: 20px; /* 按钮之间的间距 */
+    flex-wrap: wrap; /* 允许在小屏幕上换行 */
+}
+.detail-footer p {
+    margin: 0; /* 移除段落默认外边距 */
+}
+

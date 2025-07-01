@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>您有新消息 - 校园失物招领</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-top: 5px solid #007bff; }
+        h2 { color: #007bff; text-align: center; margin-bottom: 25px; }
+        p { margin-bottom: 15px; }
+        .highlight { font-weight: bold; color: #007bff; }
+        .message-content { background-color: #f0f8ff; border-left: 5px solid #add8e6; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        .button { display: inline-block; background-color: #28a745; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 20px; }
+        .button:hover { background-color: #218838; }
+        .footer { text-align: center; margin-top: 30px; font-size: 0.85em; color: #777; }
+        .footer a { color: #007bff; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>您有新消息提醒！</h2>
+        <p>尊敬的 <span class="highlight">{{ receiver_username }}</span>：</p>
+        <p>您收到了来自 <span class="highlight">{{ sender_username }}</span> 的一条新消息。</p>
+
+        {% if item_name %}
+            <p>该消息与您发布的物品 "<span class="highlight">{{ item_name }}</span>" 有关。</p>
+        {% endif %}
+
+        <div class="message-content">
+            <p><strong>消息内容:</strong></p>
+            <p>{{ message_content }}</p>
+        </div>
+
+        <p>请点击下方按钮前往查看并回复：</p>
+        <p style="text-align: center;">
+            <a href="{{ url_for('my_messages', _external=True) }}" class="button">查看我的消息</a>
+        </p>
+
+        <p>或者直接访问：<a href="{{ url_for('my_messages', _external=True) }}">{{ url_for('my_messages', _external=True) }}</a></p>
+
+        <p>此邮件为系统自动发送，请勿直接回复。</p>
+    </div>
+    <div class="footer">
+        <p>感谢使用校园失物招领平台。</p>
+        <p><a href="{{ url_for('index', _external=True) }}">返回主页</a></p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的消息 - 校园失物招领</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* 消息列表特有样式 */
+        .messages-container {
+            max-width: 960px;
+            margin: 30px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .messages-container h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+        }
+        .message-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .message-item {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            position: relative;
+        }
+        .message-item.unread {
+            background-color: #e6f7ff; /* 未读消息背景色 */
+            border-color: #91d5ff;
+        }
+        .message-sender, .message-receiver {
+            font-weight: bold;
+            color: #007bff;
+            margin-right: 10px;
+            white-space: nowrap; /* 不换行 */
+        }
+        .message-meta {
+            font-size: 0.85em;
+            color: #777;
+            margin-top: 5px;
+        }
+        .message-content {
+            flex-grow: 1;
+            margin-left: 15px; /* 增加左边距 */
+        }
+        .message-content p {
+            margin: 0 0 5px 0;
+            line-height: 1.6;
+            color: #444;
+        }
+        .message-item-link {
+            font-size: 0.9em;
+            color: #28a745;
+            text-decoration: none;
+            margin-top: 5px;
+            display: inline-block;
+        }
+        .message-item-link:hover {
+            text-decoration: underline;
+        }
+        .no-messages {
+            text-align: center;
+            padding: 30px;
+            font-size: 1.1em;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <h1><a href="{{ url_for('index') }}">校园失物招领</a></h1>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="{{ url_for('index') }}">首页</a></li>
+                    <li><a href="{{ url_for('publish_item') }}">发布信息</a></li>
+                    <li><a href="{{ url_for('index') }}">信息墙</a></li>
+                    <li><a href="{{ url_for('index') }}">搜索</a></li>
+                    {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('dashboard') }}">我的中心 ({{ current_user.username }})</a></li>
+                        <li><a href="{{ url_for('my_messages') }}">我的消息</a></li> {# 新增消息链接 #}
+                        <li><a href="{{ url_for('logout') }}">退出登录</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('register') }}">注册</a></li>
+                        <li><a href="{{ url_for('login') }}">登录</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="flash {{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <div class="messages-container">
+            <h2>我的消息</h2>
+            {% if messages %}
+                <ul class="message-list">
+                    {% for msg in messages %}
+                        <li class="message-item {% if not msg.is_read and msg.receiver_id == current_user.id %}unread{% endif %}">
+                            <div>
+                                {% if msg.sender_id == current_user.id %}
+                                    <span class="message-sender">我</span>
+                                    <span style="color:#666;">发送给</span>
+                                    <span class="message-receiver">{{ msg.receiver.username }}</span>
+                                {% else %}
+                                    <span class="message-sender">{{ msg.sender.username }}</span>
+                                    <span style="color:#666;">发送给</span>
+                                    <span class="message-receiver">我</span>
+                                {% endif %}
+                                <div class="message-meta">
+                                    {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}
+                                    {% if msg.item %}
+                                        <br>关于物品: <a href="{{ url_for('item_detail', item_id=msg.item.id) }}" class="message-item-link">{{ msg.item.name }}</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="message-content">
+                                <p>{{ msg.content }}</p>
+                                {# 这里可以添加一个回复按钮或链接，点击后跳转到发送消息页面，并预填充收件人 #}
+                                {% if msg.sender_id != current_user.id %}
+                                    <a href="{{ url_for('send_message', receiver_id=msg.sender.id, item_id=msg.item.id if msg.item else None) }}" class="btn-reply">回复</a>
+                                {% else %}
+                                    <a href="{{ url_for('send_message', receiver_id=msg.receiver.id, item_id=msg.item.id if msg.item else None) }}" class="btn-reply">再次发送</a>
+                                {% endif %}
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="no-messages">您目前还没有任何消息。</p>
+            {% endif %}
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2025 校园失物招领平台. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

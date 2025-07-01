@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ item.name }} 详情 - 校园失物招领</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* 你原有的所有 CSS 样式保持不变 */
+        .detail-card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-top: 30px;
+        }
+
+        .detail-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .detail-header h2 {
+            margin: 0;
+            font-size: 2em;
+            color: #333;
+        }
+
+        .detail-type-tag {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-left: 20px;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .detail-type-tag.lost {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .detail-type-tag.found {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .detail-image {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .detail-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .detail-info p {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            line-height: 1.8;
+            color: #555;
+        }
+
+        .detail-info strong {
+            color: #333;
+        }
+
+        .detail-footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+
+        .detail-footer a {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+        }
+
+        .detail-footer a:hover {
+            background-color: #0056b3;
+        }
+
+        /* --- 新增：地图和图钉的 CSS 样式 (与 publish_item.html 保持一致或微调) --- */
+        #map-section-detail { /* 地图部分的容器 */
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        #map-section-detail h3 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        #map-container-detail {
+            position: relative;
+            display: block;
+            width: 100%;
+            max-width: 600px; /* 确保与内容区域宽度协调 */
+            margin: 10px auto 20px auto;
+            border: 1px solid #ccd;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #campus-map-detail {
+            display: block;
+            width: 100%;
+            height: auto; /* 高度自动，保持图片比例 */
+        }
+
+        #map-pin-detail {
+            position: absolute;
+            width: 30px; /* 图钉图片宽度 */
+            height: 30px; /* 图钉图片高度 */
+            background-image: url("{{ url_for('static', filename='images/pin.png') }}"); /* 你的图钉图片路径 */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transform: translate(-50%, -90%); /* 将图钉的中心X和底部Y对准点击位置 */
+            display: none; /* 初始隐藏 */
+            pointer-events: none; /* 防止图钉遮挡鼠标事件 */
+            filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.3));
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <h1><a href="{{ url_for('index') }}">校园失物招领</a></h1>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="{{ url_for('index') }}">首页</a></li>
+                    <li><a href="{{ url_for('publish_item') }}">发布信息</a></li>
+                    <li><a href="{{ url_for('index') }}">信息墙</a></li>
+                    <li><a href="#">搜索</a></li>
+                    {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('dashboard') }}">我的中心 ({{ current_user.username }})</a></li>
+                        <li><a href="{{ url_for('logout') }}">退出登录</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('register') }}">注册</a></li>
+                        <li><a href="{{ url_for('login') }}">登录</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="flash {{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <div class="detail-card">
+            <div class="detail-header">
+                <h2>{{ item.name }}</h2>
+                <span class="detail-type-tag {% if item.type == 'lost' %}lost{% else %}found{% endif %}">
+                    {% if item.type == 'lost' %}失物{% else %}拾物{% endif %}
+                </span>
+            </div>
+
+            {% if item.image_file and item.image_file != 'default.jpg' %}
+            <div class="detail-image">
+                <img src="{{ url_for('static', filename='uploads/' + item.image_file) }}" alt="{{ item.name }}">
+            </div>
+            {% endif %}
+
+            <div class="detail-info">
+                <p><strong>描述:</strong> {{ item.description if item.description else '无详细描述' }}</p>
+                <p><strong>发生地点:</strong> {{ item.location }}</p>
+                <p><strong>发生时间:</strong> {{ item.event_time.strftime('%Y年%m月%d日 %H:%M') }}</p>
+                {# --- 修正：使用 item.user.username 而不是 item.author.username --- #}
+                <p><strong>发布者:</strong> {{ item.user.username }}</p>
+                <p><strong>发布时间:</strong> {{ item.posted_date.strftime('%Y年%m月%d日 %H:%M') }}</p>
+                <p><strong>当前状态:</strong> {{ '活跃中' if item.status == 'active' else '已找回/归还' }}</p>
+            </div>
+
+            {# --- 新增：地图显示部分 --- #}
+            {% if item.pin_x is not none and item.pin_y is not none %}
+            <div id="map-section-detail">
+                <h3>物品大致位置</h3>
+                <div id="map-container-detail">
+                    <img id="campus-map-detail" src="{{ url_for('static', filename='map/map.png') }}" alt="校园地图">
+                    <div id="map-pin-detail"></div>
+                </div>
+            </div>
+            {% endif %}
+            {# --- 地图显示部分结束 --- #}
+
+            <div class="detail-footer">
+                {% if current_user.is_authenticated and current_user.id != item.user.id %} {# 修正：item.user.id #}
+                    <a href="{{ url_for('send_message', receiver_id=item.user.id, item_id=item.id) }}" class="btn-primary">联系发布者</a>
+                {% elif not current_user.is_authenticated %}
+                    <p>请 <a href="{{ url_for('login') }}">登录</a> 后联系发布者。</p>
+                {% endif %}
+                <a href="{{ url_for('index') }}">返回信息墙</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2025 校园失物招领平台. All rights reserved.</p>
+        </div>
+    </footer>
+
+    {# --- 新增：地图 JavaScript，仅当 pin_x 和 pin_y 存在时才执行 --- #}
+    {% if item.pin_x is not none and item.pin_y is not none %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const campusMapDetail = document.getElementById('campus-map-detail');
+            const mapPinDetail = document.getElementById('map-pin-detail');
+
+            // 从 Flask 传递过来的原始地图尺寸
+            const ORIGINAL_IMAGE_WIDTH = {{ ORIGINAL_MAP_WIDTH | tojson }};
+            const ORIGINAL_IMAGE_HEIGHT = {{ ORIGINAL_MAP_HEIGHT | tojson }};
+
+            // 物品保存的原始坐标
+            const itemPinX = {{ item.pin_x | tojson }};
+            const itemPinY = {{ item.pin_y | tojson }};
+
+            // 确保图片加载完成后再计算位置
+            campusMapDetail.onload = function() {
+                // 获取当前显示图片的实际宽度和高度
+                const displayedWidth = campusMapDetail.offsetWidth;
+                const displayedHeight = campusMapDetail.offsetHeight;
+
+                // 计算缩放比例
+                const scaleX = displayedWidth / ORIGINAL_IMAGE_WIDTH;
+                const scaleY = displayedHeight / ORIGINAL_IMAGE_HEIGHT;
+
+                // 将原始坐标转换到当前显示图片上的坐标
+                const pinX_displayed = itemPinX * scaleX;
+                const pinY_displayed = itemPinY * scaleY;
+
+                // 设置图钉位置并显示
+                mapPinDetail.style.left = `${pinX_displayed}px`;
+                mapPinDetail.style.top = `${pinY_displayed}px`;
+                mapPinDetail.style.display = 'block';
+            };
+
+            // 如果图片是从缓存加载，onload 事件可能不会触发。
+            // 所以这里也添加一个检查，确保即使没有 onload 也能设置图钉。
+            if (campusMapDetail.complete && campusMapDetail.naturalWidth) {
+                campusMapDetail.onload(); // 手动触发一次 onload 逻辑
+            }
+        });
+    </script>
+    {% endif %}
+</body>
+</html>

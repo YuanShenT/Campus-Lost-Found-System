@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园失物招领平台</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* 这里可以添加或修改 index.html 页面特有的样式 */
+        .search-form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px; /* 元素之间的间距 */
+            flex-wrap: wrap; /* 允许在小屏幕上换行 */
+        }
+        .search-form input[type="text"],
+        .search-form select,
+        .search-form button {
+            padding: 10px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+        .search-form button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .search-form button:hover {
+            background-color: #0056b3;
+        }
+        .clear-search-btn {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #6c757d;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+        }
+        .clear-search-btn:hover {
+            background-color: #5a6268;
+        }
+
+        /* 以下是卡片样式，如果你的 style.css 中没有，可以放在这里 */
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* 响应式网格布局 */
+            gap: 25px;
+            padding: 20px 0; /* 调整间距 */
+        }
+        .item-card-link {
+            text-decoration: none;
+            color: inherit;
+        }
+        .item-card {
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease;
+        }
+        .item-card:hover {
+            transform: translateY(-5px);
+        }
+        .item-image {
+            width: 100%;
+            height: 200px; /* 固定图片高度 */
+            overflow: hidden; /* 裁剪图片，如果超出 */
+        }
+        .item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* 裁剪图片以适应 */
+            display: block;
+        }
+        .item-content {
+            padding: 15px;
+            flex-grow: 1; /* 内容区占据剩余空间 */
+            display: flex;
+            flex-direction: column;
+        }
+        .item-content h4 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 1.2em;
+            word-break: break-word; /* 防止长名称溢出 */
+        }
+        .item-type-tag {
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        .item-content p {
+            margin-bottom: 6px;
+            color: #555;
+            font-size: 0.95em;
+        }
+        .item-content p strong {
+            color: #333;
+        }
+        .item-posted-by {
+            font-size: 0.85em;
+            color: #777;
+            margin-top: auto; /* 推到底部 */
+        }
+        .no-items-message {
+            text-align: center;
+            padding: 50px;
+            color: #777;
+            font-size: 1.1em;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            max-width: 600px;
+            margin: 30px auto;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <h1><a href="{{ url_for('index') }}">校园失物招领</a></h1>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="{{ url_for('index') }}">首页</a></li>
+                    <li><a href="{{ url_for('publish_item') }}">发布信息</a></li>
+                    <li><a href="{{ url_for('index') }}">信息墙</a></li>
+                    <li><a href="{{ url_for('index') }}">搜索</a></li>
+                    {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('dashboard') }}">我的中心 ({{ current_user.username }})</a></li>
+                        <li><a href="{{ url_for('logout') }}">退出登录</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('register') }}">注册</a></li>
+                        <li><a href="{{ url_for('login') }}">登录</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="flash {{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <section class="hero">
+            <h2>欢迎来到校园失物招领平台！</h2>
+            <p>在这里，你可以发布丢失的物品信息，也可以分享你捡到的物品。</p>
+            <p>让我们一起帮助物品找到它的主人！</p>
+            {% if not current_user.is_authenticated %}
+                <p>请 <a href="{{ url_for('login') }}">登录</a> 或 <a href="{{ url_for('register') }}">注册</a> 开始使用。</p>
+            {% else %}
+                <p>您已登录。现在可以 <a href="{{ url_for('publish_item') }}">发布信息</a> 或浏览下方信息。</p>
+            {% endif %}
+        </section>
+
+        <section class="search-section">
+            <form action="{{ url_for('index') }}" method="GET" class="search-form">
+                <input type="text" name="query" placeholder="搜索物品名称、描述、地点..." value="{{ search_query or '' }}">
+                <select name="type">
+                    <option value="">所有类型</option>
+                    <option value="lost" {% if item_type_filter == 'lost' %}selected{% endif %}>失物</option>
+                    <option value="found" {% if item_type_filter == 'found' %}selected{% endif %}>拾物</option>
+                </select>
+                <select name="region_name">
+                    <option value="">所有区域</option>
+                    {# MAP_REGIONS 是从 Flask 后端传递过来的字典 #}
+                    {% for region_key, region_coords in MAP_REGIONS.items() %} {# 使用 region_key 和 region_coords 来避免与 for 循环中的 region 变量冲突 #}
+                        <option value="{{ region_key }}" {% if selected_region == region_key %}selected{% endif %}>{{ region_key }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">搜索</button>
+                {% if search_query or item_type_filter or selected_region %}
+                    <a href="{{ url_for('index') }}" class="clear-search-btn">清除搜索</a>
+                {% endif %}
+            </form>
+        </section>
+
+        <section class="latest-items">
+            <h3>
+                {% if search_query or item_type_filter or selected_region %}
+                    搜索结果
+                {% else %}
+                    最新失物/拾物信息
+                {% endif %}
+            </h3>
+            <div class="item-grid">
+                {% if items %}
+                    {% for item in items %}
+                    <a href="{{ url_for('item_detail', item_id=item.id) }}" class="item-card-link">
+                        <div class="item-card {{ item.type }}">
+                            <div class="item-image">
+                                <img src="{{ url_for('static', filename='uploads/' + item.image_file) if item.image_file and item.image_file != 'default.jpg' else url_for('static', filename='images/default.jpg') }}" alt="{{ item.name }}">
+                            </div>
+                            <div class="item-content">
+                                <h4>{{ item.name }}</h4>
+                                <p class="item-type-tag">
+                                    {% if item.type == 'lost' %}
+                                        <span style="color: #dc3545;">[失物]</span>
+                                    {% else %}
+                                        <span style="color: #28a745;">[拾物]</span>
+                                    {% endif %}
+                                </p>
+                                <p><strong>描述:</strong> {{ item.description | truncate(100) }}</p>
+                                <p><strong>地点:</strong> {{ item.location }}</p>
+                                <p><strong>发生时间:</strong> {{ item.event_time.strftime('%Y年%m月%d日 %H:%M') }}</p>
+                                <p class="item-posted-by">
+                                    {# --- 修正：根据你的 models.py，这里是 item.user.username 和 item.posted_date --- #}
+                                    发布者: {{ item.user.username }} 于 {{ item.posted_date.strftime('%Y-%m-%d') }}
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <p class="no-items-message">
+                        {% if search_query or item_type_filter or selected_region %}
+                            没有找到匹配的物品信息。
+                        {% else %}
+                            当前还没有任何失物或拾物信息。
+                        {% endif %}
+                    </p>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2025 校园失物招领平台. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

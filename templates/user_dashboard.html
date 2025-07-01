@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的个人中心 - 校园失物招领</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* 只针对个人中心页面的一些额外样式 */
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .dashboard-header h2 {
+            color: #4CAF50;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-header p {
+            font-size: 1.1em;
+            color: #666;
+        }
+
+        .dashboard-item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .dashboard-item-card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            position: relative; /* 用于定位状态标记 */
+        }
+
+        .dashboard-item-card.lost { border-top: 5px solid #dc3545; }
+        .dashboard-item-card.found { border-top: 5px solid #28a745; }
+
+        .dashboard-item-image {
+            width: 100%;
+            height: 180px; /* 调整图片高度 */
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #e9ecef;
+        }
+
+        .dashboard-item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .dashboard-item-content {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dashboard-item-content h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        .dashboard-item-content p {
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .dashboard-item-actions {
+            display: flex;
+            justify-content: center;
+            padding: 10px 15px;
+            border-top: 1px solid #eee;
+            background-color: #f8f8f8;
+        }
+
+        .dashboard-item-actions a, .dashboard-item-actions button {
+            flex-grow: 1;
+            text-align: center;
+            padding: 8px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 0.9em;
+            margin: 0 5px;
+            white-space: nowrap; /* 防止按钮文字换行 */
+            transition: background-color 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .dashboard-item-actions .edit-btn { background-color: #ffc107; color: #333; }
+        .dashboard-item-actions .edit-btn:hover { background-color: #e0a800; }
+        .dashboard-item-actions .delete-btn { background-color: #dc3545; color: white; }
+        .dashboard-item-actions .delete-btn:hover { background-color: #c82333; }
+        .dashboard-item-actions .mark-found-btn { background-color: #28a745; color: white; }
+        .dashboard-item-actions .mark-found-btn:hover { background-color: #218838; }
+
+        .item-status-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #ffc107;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            font-weight: bold;
+            z-index: 10;
+        }
+        .item-status-badge.active { background-color: #17a2b8; color: white; }
+        .item-status-badge.found, .item-status-badge.returned { background-color: #28a745; color: white; }
+        .no-items-message {
+            text-align: center;
+            padding: 30px;
+            font-size: 1.2em;
+            color: #777;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <h1><a href="{{ url_for('index') }}">校园失物招领</a></h1>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="{{ url_for('index') }}">首页</a></li>
+                    <li><a href="{{ url_for('publish_item') }}">发布信息</a></li>
+                    <li><a href="{{ url_for('index') }}">信息墙</a></li>
+                    <li><a href="{{ url_for('index') }}">搜索</a></li>
+                    {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('dashboard') }}">我的中心 ({{ current_user.username }})</a></li>
+                        <li><a href="{{ url_for('logout') }}">退出登录</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('register') }}">注册</a></li>
+                        <li><a href="{{ url_for('login') }}">登录</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="flash {{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <section class="dashboard-header">
+            <h2>{{ current_user.username }} 的个人中心</h2>
+            <p>在这里管理您发布的所有失物或拾物信息。</p>
+        </section>
+
+        <section class="dashboard-actions">
+        <a href="{{ url_for('my_messages') }}" class="btn">我的消息</a>
+        </section>
+
+        <section class="user-items-list">
+            <h3>我发布的信息</h3>
+            <div class="dashboard-item-grid">
+                {% if user_items %}
+                    {% for item in user_items %}
+                    <div class="dashboard-item-card {{ item.type }}">
+                        {# 状态标记 #}
+                        <span class="item-status-badge {{ item.status }}">
+                            {% if item.status == 'active' %}
+                                活跃中
+                            {% elif item.status == 'found' %}
+                                已找回
+                            {% elif item.status == 'returned' %}
+                                已归还
+                            {% else %}
+                                {{ item.status }} {# Fallback #}
+                            {% endif %}
+                        </span>
+
+                        <div class="dashboard-item-image">
+                            <img src="{{ url_for('static', filename='uploads/' + item.image_file) }}" alt="{{ item.name }}">
+                        </div>
+                        <div class="dashboard-item-content">
+                            <h4>{{ item.name }}</h4>
+                            <p class="item-type-tag">
+                                {% if item.type == 'lost' %}
+                                    <span style="color: #dc3545;">[失物]</span>
+                                {% else %}
+                                    <span style="color: #28a745;">[拾物]</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>描述:</strong> {{ item.description | truncate(80) }}</p>
+                            <p><strong>地点:</strong> {{ item.location }}</p>
+                            <p><strong>发生时间:</strong> {{ item.event_time.strftime('%Y年%m月%d日') }}</p>
+                            <p><strong>发布日期:</strong> {{ item.posted_date.strftime('%Y-%m-%d') }}</p>
+                        </div>
+                        <div class="dashboard-item-actions">
+                        <a href="{{ url_for('item_detail', item_id=item.id) }}" class="btn-detail">查看</a>
+                        <a href="{{ url_for('edit_item', item_id=item.id) }}" class="edit-btn">编辑</a>
+                        <form action="{{ url_for('delete_item', item_id=item.id) }}" method="POST" style="display: inline;">
+                            <button type="submit" class="delete-btn" onclick="return confirm('确定要删除这条信息吗？此操作不可撤销！');">删除</button>
+                        </form>
+                        {% if item.status == 'active' %}
+                            <form action="{{ url_for('mark_item_resolved', item_id=item.id) }}" method="POST" style="display: inline;">
+                                <button type="submit" class="mark-found-btn" onclick="return confirm('确定要标记为已找回/归还吗？');">标记为已解决</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="no-items-message">您还没有发布任何失物或拾物信息。</p>
+                    <p class="no-items-message"><a href="{{ url_for('publish_item') }}">立即发布一条信息</a></p>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2025 校园失物招领平台. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>您的物品可能找到匹配了！ - 校园失物招领</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-top: 5px solid #007bff; }
+        h2 { color: #007bff; text-align: center; margin-bottom: 25px; }
+        p { margin-bottom: 15px; }
+        .highlight { font-weight: bold; color: #007bff; }
+        .item-card { background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+        .item-card h3 { margin-top: 0; color: #343a40; }
+        .item-card p { margin-bottom: 5px; }
+        .button { display: inline-block; background-color: #28a745; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 20px; }
+        .button:hover { background-color: #218838; }
+        .footer { text-align: center; margin-top: 30px; font-size: 0.85em; color: #777; }
+        .footer a { color: #007bff; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>您好，{{ recipient_username }}！</h2>
+        <p>我们高兴地通知您，您发布的物品 **"<span class="highlight">{{ current_item.name }}</span>"** 可能找到了一个匹配项！</p>
+
+        <div class="item-card">
+            <h3>您的物品信息：</h3>
+            <p><strong>名称:</strong> {{ current_item.name }}</p>
+            <p><strong>类型:</strong> {% if current_item.type == 'lost' %}失物{% else %}拾物{% endif %}</p>
+            <p><strong>描述:</strong> {{ current_item.description }}</p>
+            <p><strong>地点:</strong> {{ current_item.location }}</p>
+            <p><strong>发生时间:</strong> {{ current_item.event_time.strftime('%Y年%m月%d日 %H:%M') }}</p>
+            <p><strong>发布者:</strong> {{ current_item.author.username }}</p>
+            <p style="text-align: center;">
+                <a href="{{ url_for('item_detail', item_id=current_item.id, _external=True) }}" class="button" style="background-color: #007bff;">查看您的物品详情</a>
+            </p>
+        </div>
+
+        <div class="item-card">
+            <h3>潜在匹配物品信息：</h3>
+            <p><strong>名称:</strong> {{ matching_item.name }}</p>
+            <p><strong>类型:</strong> {% if matching_item.type == 'lost' %}失物{% else %}拾物{% endif %}</p>
+            <p><strong>描述:</strong> {{ matching_item.description }}</p>
+            <p><strong>地点:</strong> {{ matching_item.location }}</p>
+            <p><strong>发生时间:</strong> {{ matching_item.event_time.strftime('%Y年%m月%d日 %H:%M') }}</p>
+            <p><strong>发布者:</strong> {{ matching_item.author.username }}</p>
+            <p style="text-align: center;">
+                <a href="{{ url_for('item_detail', item_id=matching_item.id, _external=True) }}" class="button">查看匹配物品详情</a>
+            </p>
+        </div>
+
+        <p>如果您认为这是一个有效匹配，请通过站内私信功能联系对方！</p>
+        <p>此邮件为系统自动发送，请勿直接回复。</p>
+    </div>
+    <div class="footer">
+        <p>感谢使用校园失物招领平台。</p>
+        <p><a href="{{ url_for('index', _external=True) }}">返回主页</a></p>
+    </div>
+</body>
+</html>

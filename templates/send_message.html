@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发送消息给 {{ receiver.username }} - 校园失物招领</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* 继承或自定义一些样式 */
+        .message-form-container {
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .message-form-container h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+        }
+        .message-form-container label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: bold;
+        }
+        .message-form-container textarea {
+            width: calc(100% - 22px);
+            padding: 12px 10px;
+            margin-bottom: 18px;
+            border: 1px solid #ccd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1em;
+            resize: vertical;
+            min-height: 150px;
+        }
+        .message-form-container input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1.1em;
+            transition: background-color 0.2s ease;
+        }
+        .message-form-container input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .message-info-box {
+            background-color: #f0f2f5;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .message-info-box p {
+            margin: 5px 0;
+            font-size: 0.95em;
+            color: #666;
+        }
+        .message-info-box strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <h1><a href="{{ url_for('index') }}">校园失物招领</a></h1>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="{{ url_for('index') }}">首页</a></li>
+                    <li><a href="{{ url_for('publish_item') }}">发布信息</a></li>
+                    <li><a href="{{ url_for('index') }}">信息墙</a></li>
+                    <li><a href="{{ url_for('index') }}">搜索</a></li>
+                    {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('dashboard') }}">我的中心 ({{ current_user.username }})</a></li>
+                        <li><a href="{{ url_for('my_messages') }}">我的消息</a></li> {# 新增消息链接 #}
+                        <li><a href="{{ url_for('logout') }}">退出登录</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('register') }}">注册</a></li>
+                        <li><a href="{{ url_for('login') }}">登录</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="flash {{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <div class="message-form-container">
+            <h2>发送消息给 {{ receiver.username }}</h2>
+            {% if item %}
+                <div class="message-info-box">
+                    <p>您正在就 **"{{ item.name }}"** ({{ '失物' if item.type == 'lost' else '拾物' }}) 发送消息。</p>
+                    <p><a href="{{ url_for('item_detail', item_id=item.id) }}">查看物品详情</a></p>
+                </div>
+            {% endif %}
+            <form method="POST" action="{{ url_for('send_message', receiver_id=receiver.id, item_id=item.id if item else None) }}">
+                <label for="content">消息内容:</label>
+                <textarea id="content" name="content" required placeholder="请输入您的消息..."></textarea>
+
+                <input type="submit" value="发送消息">
+            </form>
+            <p style="text-align: center; margin-top: 20px;"><a href="{{ url_for('my_messages') }}">返回我的消息</a></p>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2025 校园失物招领平台. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
